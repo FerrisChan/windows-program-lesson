@@ -130,30 +130,52 @@ void HashCache::put(string key, Value value) {
 int HashCache::load_file_to_page(const int &file_num, Page* &page, map<string, Node* > &mapNode) {
     ifstream input;
     string file_name = to_string(file_num) + ".txt"; 
-    input.open(file_name, ios::in);
+    input.open(file_name, ios::in|ios::binary);
     if (!input || page == NULL)
         return FAILED; 
     file_accessed[file_num] = true;  
     page->file_num_ = file_num;
     Node* data = page->data_;
     for (int i = 0; i < PAGE_SIZE; i++) {
-		string key;
-		string strValue;
+// 		string key;
+// 		string strValue;
+// 		if (!(input >> key >> strValue))
+// 		{
+// 			Value* newValue = new Value;
+// 			data[i].key_ = "";
+// 			data[i].value_ = *newValue; // 输入为空
+// 		}
+// 		else
+// 		{
+// 
+// 			Value* newValue = new Value;
+// 			data[i].key_ = key;
+// 			newValue->strValue = strValue;
+// 			data[i].value_ = *newValue; // 
+// 		}
 
-
-		if (!(input >> key >> strValue))
+		char szBuf[LEN_VALUE * 2] = {0};
+		if (!input.getline(szBuf, sizeof(szBuf)))
 		{
-			Value* newValue = new Value;
-			data[i].key_ = "";
-			data[i].value_ = *newValue; // 输入为空
+		 	Value* newValue = new Value;
+		 	data[i].key_ = "";
+		 	data[i].value_ = *newValue; // 输入为空
 		}
 		else
 		{
 			Value* newValue = new Value;
-			data[i].key_ = key;
-			newValue->strValue = strValue;
-			data[i].value_ = *newValue; // 
+			int k;
+			int t;
+			int l;
+			char v[LEN_VALUE] = { 0 };
+			scanf_s(szBuf, LEN_VALUE * 2, "%d %d%d%s\n", &k, &t, &l, v);
+			newValue->itype = (TYPE)t;
+			newValue->ilength = l;
+			strcpy_s(newValue->strValue, v);
+			data[i].key_ = to_string(k);
+			data[i].value_ = *newValue;
 		}
+
            
         mapNode[data[i].key_] = data + i;
     }
@@ -167,16 +189,24 @@ int HashCache::save_page_to_file(Page* &page) {
         return FAILED;
     ofstream output;
     string file_name = to_string(page->file_num_) + ".txt"; // 用文件编号构造文件名
-    output.open(file_name, ios::out);
+    output.open(file_name, ofstream::binary);
     Node* data = page->data_;
-    for (int i = 0; i < PAGE_SIZE; i++) {
+    for (int i = 0; i < PAGE_SIZE; i++) 
+	{
+
 		string key = data[i].key_;
 		if (key.length() > 0) {
-			output << data[i].key_ << " " << data[i].value_.itype << data[i].value_.ilength << data[i].value_.strValue << endl;
+			char szBuf[LEN_VALUE * 2] = { 0 };
+			sprintf_s(szBuf, LEN_VALUE * 2, "%d %d%d%s\n", atoi(key.c_str()), data[i].value_.itype, data[i].value_.ilength, data[i].value_.strValue);
+			output.write(szBuf, strlen(szBuf));
+// 			string buff = key;
+// 			buff.append(key).append(" ");
+// 			buff.append(to_string(data[i].value_.itype));
+//			output << data[i].key_ << " " << data[i].value_.itype << data[i].value_.ilength << data[i].value_.strValue << endl;
 		}
 		else
 		{
-			output <<"empty key" << endl; 
+			output <<"emptykey" << endl; 
 		}
     }
     output.close();
@@ -312,16 +342,21 @@ void HashCache::save_hotdata_to_file() {
 	
 	ofstream output;
 	string file_name = "hotdata.txt"; 
-	output.open(file_name, ios::out);
+	output.open(file_name, std::ofstream::binary);
 
 	for (auto iter = m_map_hot.begin(); iter!=m_map_hot.end(); ++iter )
 	{
+		Node* n = iter->second;
 		string key = iter->first;
-		Node* value_ = iter->second;
-		if (key.length() > 0 && value_)
-		{
-			output << key << " " << value_->value_.itype << value_->value_.ilength << value_->value_.strValue << endl; 
+		if (key.length() > 0 && n) {
+			char szBuf[LEN_VALUE * 2] = { 0 };
+			sprintf_s(szBuf, LEN_VALUE * 2, "%d %d%d%s\n", atoi(key.c_str()), n->value_.itype, n->value_.ilength, n->value_.strValue);
+			output.write(szBuf, strlen(szBuf));
 		}
+// 		if (key.length() > 0 && n)
+// 		{
+// 			output << key << " " << n->value_.itype << n->value_.ilength << string(n->value_.strValue) << endl; 
+// 		}
 	}
 	output.close();
 	return ;

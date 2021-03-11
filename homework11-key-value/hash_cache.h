@@ -12,6 +12,7 @@
 #define PAGE_SIZE 10
 #define DISK_SIZE 20
 #define CACHE_SIZE 2
+#define LEN_VALUE 256
 
 #define FAILED -1
 using namespace std;
@@ -25,21 +26,31 @@ typedef enum {
 
 using Value = struct  _sValue
 {
+
+
 	bool operator == (const _sValue& t1) {
-		return strValue == t1.strValue;
+		// return strValue == t1.strValue;
+		return strcmp(strValue, t1.strValue) == 0;
 	}
 
 	bool operator != (const _sValue& t1) {
-		return !(strValue == t1.strValue);
+		// return !(strValue == t1.strValue);
+		return strcmp(strValue, t1.strValue) != 0;
 	}
 
+	_sValue(const _sValue& obj) {
+		itype = obj.itype;
+		ilength = obj.ilength;
+		strcpy_s(strValue, obj.strValue);
+	}
 	_sValue() {
 		itype = TYPE_STRING;
 		ilength = 0;
+		memset(strValue, 0, LEN_VALUE);
 	};
 	TYPE itype;
 	int ilength;
-	string strValue;
+	char strValue[LEN_VALUE];
 };
 
 class HashCache {

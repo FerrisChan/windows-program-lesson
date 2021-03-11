@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <stdio.h>
 
 using namespace std;
 
@@ -60,9 +61,10 @@ void putWork1()
 			j = order++;
 		}
 		Value val;
-		val.strValue = string(__FUNCTION__).append("").append(to_string(i).c_str());
+		string temp = string(__FUNCTION__).append("").append(to_string(i));
+		sprintf_s(val.strValue, LEN_VALUE, temp.c_str());
 		val.itype = TYPE_STRING;
-		val.ilength = val.strValue.length();
+		val.ilength = temp.length() + 1;
 		cache.put(to_string(j), val);
 	}
 }
@@ -79,9 +81,10 @@ void putWork2()
 		}
 
 		Value val;
-		val.strValue = string(__FUNCTION__).append("").append(to_string(i).c_str());
+		string temp = string(__FUNCTION__).append("").append(to_string(i));
+		sprintf_s(val.strValue, LEN_VALUE, temp.c_str());
 		val.itype = TYPE_STRING;
-		val.ilength = val.strValue.length();
+		val.ilength = temp.length() + 1;
 		cache.put(to_string(j), val);
 	}
 }
@@ -91,6 +94,7 @@ void getWork()
 	for (int i = 0; i < SUM; i++)
 	{
 		Value val = cache.get(to_string(i));
-		cout << "get " << i << ": type:" << printType(val.itype) << ", ilength:[" << val.ilength << "] ,Value:[" << val.strValue << "]" << endl;
+		string strValue(val.strValue);
+		cout << "get " << i << ": type:" << printType(val.itype) << ", ilength:[" << val.ilength << "] ,Value:[" << strValue << "]" << endl;
 	}
 }
